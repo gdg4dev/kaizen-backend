@@ -162,34 +162,60 @@ router.route("/suggest").post(async (req, res) => {
 	// create a function that suggests videos based on the transcript to help students understand the topic better,
 	// FIND transcript of video by YouTube video ID SEND IN req.body.url
 	const { url } = req.body;
-	let transcript = await Video.findOne({ url: url });
-	transcript = transcript.transcript;
 
-	let suggestions = await generateSuggestions(transcript)
-    .then(async (suggestions) => {
-        let sgs = JSON.parse(suggestions);
-        let videos = [];
-    
-        // Map over the subtopics and create an array of promises
-        let videoPromises = sgs.subtopics.map((topic) => {
-            // Return the promise returned by searchYouTubeVideos
-            return searchYouTubeVideos(topic).then((result) => {
-                console.log(result);
-                // Push the first video to the videos array
-                videos.push(result[0]);
-            });
-        });
-    
-        // Wait for all promises to settle
-        await Promise.all(videoPromises);
-    
-        // Once all promises are settled, return the videos array
-        return videos;
+
+      
+        try {
+          const response = await youtube.search.list({
+            part: 'snippet',
+            q: 'thermodynamics law 1 and 2',
+            type: 'video',
+            maxResults: 4,
+          });
+      
+          return res.json({suggestions:  response.data.items.map((item) => ({
+			title: item.snippet.title,
+			description: item.snippet.description,
+			videoId: item.id.videoId,
+			thumbnail: item.snippet.thumbnails.default.url,
+		}))
     })
-		.catch((error) => {
-            console.error("Failed to generate suggestions:", error);
-			return res.status(500).send("Internal Server Error");
-		});
-        res.status(200).json({  suggestions: suggestions });
+        } catch (error) {
+          console.error('Error fetching related videos:', error);
+          return res.json([]);
+        }
+    
+      
+
+
+	// let transcript = await Video.findOne({ url: url });
+	// transcript = transcript.transcript;
+
+	// let suggestions = await generateSuggestions(transcript)
+    // .then(async (suggestions) => {
+    //     let sgs = JSON.parse(suggestions);
+    //     let videos = [];
+    
+    //     // Map over the subtopics and create an array of promises
+    //     let videoPromises = sgs.subtopics.map((topic) => {
+    //         // Return the promise returned by searchYouTubeVideos
+    //         return searchYouTubeVideos(topic).then((result) => {
+    //             console.log(result);
+    //             // Push the first video to the videos array
+    //             videos.push(result[0]);
+    //         });
+    //     });
+    
+    //     // Wait for all promises to settle
+    //     await Promise.all(videoPromises);
+    
+    //     // Once all promises are settled, return the videos array
+    //     return videos;
+    // })
+	// 	.catch((error) => {
+    //         console.error("Failed to generate suggestions:", error);
+	// 		return res.status(500).send("Internal Server Error");
+	// 	});
+    //     res.status(200).json({  suggestions: suggestions });
 });
 module.exports = router;
