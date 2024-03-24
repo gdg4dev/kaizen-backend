@@ -21,7 +21,6 @@
     "ffmpeg-extract-audio": "^1.0.2",
     "googleapis": "^134.0.0",
     "mongoose": "^8.2.3",
-    "mongoose-auto-increment": "^5.0.1",
     "nodemon": "^3.1.0",
     "openai": "^4.29.2",
     "youtube-transcript": "^1.1.0",
