@@ -101,43 +101,11 @@ router.route("/upload").post(async (req, res) => {
 			} catch (error) {
 				return res.status(400).send("Transcript not available");
 			}
-			fs.writeFileSync(
-				`./transcripts/${url.split("=")[1]}.txt`,
-				transcript
-			);
-		} else {
-			async function downloadVideo(url) {
-				const response = await axios.get(url, {
-					responseType: "stream",
-				});
-				const contentType = response.headers["content-type"];
-
-				if (
-					contentType !== "video/mp4" &&
-					contentType !== "video/x-matroska"
-				) {
-					return false;
-				}
-
-				const fileName = `tmp.${contentType.split("/")[1]}`;
-				const path = `./videos/${fileName}`;
-
-				const writer = fs.createWriteStream(path);
-				response.data.pipe(writer);
-
-				return new Promise((resolve, reject) => {
-					writer.on("finish", () => resolve(path));
-					writer.on("error", reject);
-				});
-			}
-
-			videoPath = await downloadVideo(url);
-			if (!videoPath) {
-				return res
-					.status(400)
-					.send("Format not valid, choose direct .mp4 or .mkv links");
-			}
-		}
+			// fs.writeFileSync(
+			// 	`./transcripts/${url.split("=")[1]}.txt`,
+			// 	transcript
+			// );
+		} 
 
 		const newVideo = new Video({
 			url,
